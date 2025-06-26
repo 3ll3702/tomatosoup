@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>타이머</title>
+    <title>TomatoSoup</title>
 </head>
 <body>  
        
@@ -26,31 +26,76 @@
 </body>
 
 <script>
-    //리팩토링 기준
-    //함수는 하나의 역할만 수행하도록
-    //변수명은 의미가 명확하게
+/* 투두리스트? 약간의 생각정리를 위한 구간?
+    구조는 주석 + 각 구간에 해당하는 함수로 이루어 질 것임.
+*/
 
-    //중복을 제거한다
-    //ui제어는 별도 함수로 분리한다
+
+/*
+1.시간이 원하는대로 증가식으로 타이머가 보이는 기능
+    1.startTimer()먼저 구성해보기.
+        안에 들어가야하는 것.
+        *setInitial 초기 값을 설정하는 함수
+        *switchUi ui에서 스위치처럼 바뀔 필요가 있는 부분을 바꿔주는 함수
+        *timerInterval :timer()를 인터벌을 줘서 시간 측정용.
+    2.timer()
+*/
+
+    function startTimer(){
+
+    }
+    function setInitial(){
+
+    }
+    function switchUi(){
+
+    }
+    function timerInterval(){
+        setInterval
+    }
+   
+    function timer(){
+      
+    }
+
+    let hour = 8*60*60*1000;
+    let minute = 30*60*1000;
+    let targetTime = new Date(hour+minute-(9*60*60*1000));
+    const initialTime = new Date(-(9*60*60*1000));
     
-    //목적정의
-    //유지보수가 어려운가? 여러개가 서로 얽혀있어서 불편함.
-    //테스트가 불편한가? 불편하지 않음
-    //기능 추가가 힘든가? 얽혀있어서 힘듬.
-    //가독성이 떨어지는가? 스스로 봐도 모름
-
-    //코드 분석
-    //기능 단위로 코드 나누기 
-    //중복 코드 찾기
-    //상태 관리 방식 점검
-
-    //할 놀이 정리
-    //0.돌아가는 상태가 어떻게 돌아가는지 먼저 파악하기.
-    //1.함수나 변수명을 명확히 하고, 하나의 역할만 수행할 수 있도록 = 레고블럭만들기.
-    //2.중복제거 = 위를 하다보면 될 거 같음.
-    //3.ui제어를 별도 함수로 분리
     
-    //
+    
+    console.log(initialTime);
+    console.log(targetTime);
+    console.log(targetTime.getHours()+":"+targetTime.getMinutes());
+    console.log((initialTime.getTime(100000)))
+    
+
+
+/*
+2.시간이 잠시 멈추거나 완전히 정지하는 기능
+    1.pause() : 시간이 잠시 멈추는 기능
+    2.resetTimer() 완전히 정지시키는 기능 
+
+3.한 사이클의 목표시간을 정확히 완수하여 그와 관련 처리 후에 휴식으로 넘어가는 기능
+    successToFocus(): 목표 시간에 도달하면 활성화가 됨.
+    failToFocus() :집중하지 못한 경우 누르게 되어 있음
+
+
+4.휴식시간에서 다시 공부시간으로 넘어가게 하는 기능
+    takeShortBreak()
+    takeLongBreak()
+    newCycle()
+
+5.집중시간을 계산해서 사용자 경험을 살려주는 기능
+    improveFocus()
+    deteriorateFocus()
+
+*/
+
+
+
+
 
 
 //현재 돌아가는 상태
@@ -62,188 +107,188 @@
 
 //startTimer()
 //필요한 변수
-    let shortRelaxTime;//임시로 3 부여해둠. 3분 쉬기 위해서. 추후 개인 설정값을 가져옴
-    let longRelaxTime; //임시로 6부여해둠 그냥 길게 표현. 추후 개인 설정값을 가져옴
-    let studyTime;//임시로 3을 부여해둠. 추후 개인 설정값을 가져옴 
-    let cycle = 0; //공부사이클
-    let studyTimeLeft; //현재 남은 공부 시간
-    let isPaused=false; //일시정지상태?
-    let isStudyTime=true; //공부상태?
-    let timerinterval = setInterval(timer,1000); //
+//     let shortRelaxTime;//임시로 3 부여해둠. 3분 쉬기 위해서. 추후 개인 설정값을 가져옴
+//     let longRelaxTime; //임시로 6부여해둠 그냥 길게 표현. 추후 개인 설정값을 가져옴
+//     let studyTime;//임시로 3을 부여해둠. 추후 개인 설정값을 가져옴 
+//     let cycle = 0; //공부사이클
+//     let studyTimeLeft; //현재 남은 공부 시간
+//     let isPaused=false; //일시정지상태?
+//     let isStudyTime=true; //공부상태?
+//     let timerinterval = setInterval(timer,1000); //
     
 
 
 
-//필요한 함수
-   function startTimer(){
-        requestUserInitialValue();
-        setInitialValue();
-        controlUI_01();
-        timerinterval;
-    } //같이 쓰일것
-    function requestUserInitialValue(){
-        //초기값을 불러오는 용도.
-        shortRelaxTime = 3;
-        longRelaxTime = 6;
-        studyTime = 3;
-    }
-    function setInitialValue(){
-        let extraStudyTime=document.getElementById("extraStudyTime").value;
-        let extraShortRelaxTime=document.getElementById("").value;
-        let extraLongRelaxTime=document.getElementById("").value;
+// //필요한 함수
+//    function startTimer(){
+//         requestUserInitialValue();
+//         setInitialValue();
+//         controlUI_01();
+//         timerinterval;
+//     } //같이 쓰일것
+//     function requestUserInitialValue(){
+//         //초기값을 불러오는 용도.
+//         shortRelaxTime = 3;
+//         longRelaxTime = 6;
+//         studyTime = 3;
+//     }
+//     function setInitialValue(){
+//         let extraStudyTime=document.getElementById("extraStudyTime").value;
+//         let extraShortRelaxTime=document.getElementById("").value;
+//         let extraLongRelaxTime=document.getElementById("").value;
         
-        studyTime += extraStudyTime;
-        shortRelaxTime += extraShortRelaxTime;
-        longRelaxTime += extraLongRelaxTime
+//         studyTime += extraStudyTime;
+//         shortRelaxTime += extraShortRelaxTime;
+//         longRelaxTime += extraLongRelaxTime
 
-    }
-    function controlUI_01(){
-        // 숨기는것 : 시작, 시간입력 | 보이는 것 : 일시정지, 정지, 시간출력
-    }
+//     }
+//     function controlUI_01(){
+//         // 숨기는것 : 시작, 시간입력 | 보이는 것 : 일시정지, 정지, 시간출력
+//     }
     
 
-    //ui 컨트롤
-    //timerFlag, pauseFlag 두 개의 조건 + cycle의 값에 따라 변화하던 중임.
-    //위 둘은 isStudyTime과 isPaused로 이름이 변경된 상황.
+//     //ui 컨트롤
+//     //timerFlag, pauseFlag 두 개의 조건 + cycle의 값에 따라 변화하던 중임.
+//     //위 둘은 isStudyTime과 isPaused로 이름이 변경된 상황.
 
- const a = document.getElementById("timerStatus");
+//  const a = document.getElementById("timerStatus");
 
 
 
     
-      function timerFlagSwitch(){
-        if(timerFlag){
-                a.innerText="공부중";//학습 중일 때
-            }else if(!timerFlag && (cycle)%4!=0){
-                a.innerText="휴식중";//휴식 중일 때
-            }else{
-                a.innerText="긴휴식중";//긴휴식 중일 때
-            }
+//       function timerFlagSwitch(){
+//         if(timerFlag){
+//                 a.innerText="공부중";//학습 중일 때
+//             }else if(!timerFlag && (cycle)%4!=0){
+//                 a.innerText="휴식중";//휴식 중일 때
+//             }else{
+//                 a.innerText="긴휴식중";//긴휴식 중일 때
+//             }
 
-    }
+//     }
 
-// timer()를 인터벌로 동작시킴 - >
+// // timer()를 인터벌로 동작시킴 - >
 
-    function start(){
-        timerFlagSwitch();
-        addStudyTime=document.getElementById("setTime").value;
-        if(timerFlag){
-        studyTimeLeft = new Date(addStudyTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
-        }else if(!timerFlag && (cycle)%4!=0) {
-            studyTimeLeft = new Date(shortRelaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
-        }else{
-            studyTimeLeft = new Date(longRelaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
-        }
-        document.getElementById("timer").innerText=studyTimeLeft.toString().substring(19,24);
-        clearInterval(timerinterval) 
+//     function start(){
+//         timerFlagSwitch();
+//         addStudyTime=document.getElementById("setTime").value;
+//         if(timerFlag){
+//         studyTimeLeft = new Date(addStudyTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
+//         }else if(!timerFlag && (cycle)%4!=0) {
+//             studyTimeLeft = new Date(shortRelaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
+//         }else{
+//             studyTimeLeft = new Date(longRelaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
+//         }
+//         document.getElementById("timer").innerText=studyTimeLeft.toString().substring(19,24);
+//         clearInterval(timerinterval) 
 
-        //이 아래 다섯.
-        document.getElementById("start").setAttribute("hidden","true"); 
-        document.getElementById("pause").removeAttribute("hidden");
-        document.getElementById("stop").removeAttribute("hidden");
-        document.getElementById("timeSetHidden").setAttribute("hidden","true"); 
-        document.getElementById("timer").removeAttribute("hidden");
+//         //이 아래 다섯.
+//         document.getElementById("start").setAttribute("hidden","true"); 
+//         document.getElementById("pause").removeAttribute("hidden");
+//         document.getElementById("stop").removeAttribute("hidden");
+//         document.getElementById("timeSetHidden").setAttribute("hidden","true"); 
+//         document.getElementById("timer").removeAttribute("hidden");
 
-        timerinterval;
+//         timerinterval;
 
         
-    }
+//     }
 
     
-    function stop(){
+//     function stop(){
 
-        //이 자리에 저장되는 기능이 있어야 함.
-        studyTimeLeft=0;
-        pauseFlag=false;
-        timerFlag=true; 
-        cycle = 0;
-        clearInterval(timerinterval);
-        document.getElementById("timer").innerText="00:00";
-        document.getElementById("cycle").innerText="0 회";
-        document.getElementById("timerStatus").innerText="대기중";
+//         //이 자리에 저장되는 기능이 있어야 함.
+//         studyTimeLeft=0;
+//         pauseFlag=false;
+//         timerFlag=true; 
+//         cycle = 0;
+//         clearInterval(timerinterval);
+//         document.getElementById("timer").innerText="00:00";
+//         document.getElementById("cycle").innerText="0 회";
+//         document.getElementById("timerStatus").innerText="대기중";
 
-        //이 아래 셋 switchStatus();
-        document.getElementById("stop").setAttribute("hidden","true");
-        document.getElementById("pause").setAttribute("hidden","true");
-        document.getElementById("start").removeAttribute("hidden")
-    }
+//         //이 아래 셋 switchStatus();
+//         document.getElementById("stop").setAttribute("hidden","true");
+//         document.getElementById("pause").setAttribute("hidden","true");
+//         document.getElementById("start").removeAttribute("hidden")
+//     }
 
-//
+// //
 
  
 
     
   
 
-//
+// //
 
 
 
     
 
-    function pause(){
-        if(studyTimeLeft<=0){
-            return;
-        }else if(!pauseFlag){
-            clearInterval(timerinterval);
-            document.getElementById("timerStatus").innerText="일시정지 중";
-            document.getElementById("pause").innerText="재개";
-        }else{
-            if(timerFlag){
-                document.getElementById("timerStatus").innerText="공부중";//학습 중일 때
-            }else if(!timerFlag && (cycle)%4!=0){
-                document.getElementById("timerStatus").innerText="휴식중";//휴식 중일 때
-            }else{
-                document.getElementById("timerStatus").innerText="긴휴식중";//휴식 중일 때
-            }
-            timerinterval = setInterval(timer,1000);
-            document.getElementById("pause").innerText="일시정지";
-        }
-        pauseFlag = !pauseFlag;
-    }
+//     function pause(){
+//         if(studyTimeLeft<=0){
+//             return;
+//         }else if(!pauseFlag){
+//             clearInterval(timerinterval);
+//             document.getElementById("timerStatus").innerText="일시정지 중";
+//             document.getElementById("pause").innerText="재개";
+//         }else{
+//             if(timerFlag){
+//                 document.getElementById("timerStatus").innerText="공부중";//학습 중일 때
+//             }else if(!timerFlag && (cycle)%4!=0){
+//                 document.getElementById("timerStatus").innerText="휴식중";//휴식 중일 때
+//             }else{
+//                 document.getElementById("timerStatus").innerText="긴휴식중";//휴식 중일 때
+//             }
+//             timerinterval = setInterval(timer,1000);
+//             document.getElementById("pause").innerText="일시정지";
+//         }
+//         pauseFlag = !pauseFlag;
+//     }
 
-    function timer() { 
+//     function timer() { 
 
-        studyTimeLeft = studyTimeLeft.setTime(studyTimeLeft-1000);
-        studyTimeLeft = new Date(studyTimeLeft);
-        document.getElementById("timer").innerText=studyTimeLeft.toString().substring(19,24);
-        console.log(studyTimeLeft.getTime());
-        if(studyTimeLeft.getTime()<=0){
-            document.getElementById("setTime").value=addStudyTime;
+//         studyTimeLeft = studyTimeLeft.setTime(studyTimeLeft-1000);
+//         studyTimeLeft = new Date(studyTimeLeft);
+//         document.getElementById("timer").innerText=studyTimeLeft.toString().substring(19,24);
+//         console.log(studyTimeLeft.getTime());
+//         if(studyTimeLeft.getTime()<=0){
+//             document.getElementById("setTime").value=addStudyTime;
 
-            //이 아래 넷
-            document.getElementById("start").removeAttribute("hidden");
-            document.getElementById("pause").setAttribute("hidden","true");
-            document.getElementById("timer").setAttribute("hidden","true");
-            document.getElementById("timeSetHidden").removeAttribute("hidden");
+//             //이 아래 넷
+//             document.getElementById("start").removeAttribute("hidden");
+//             document.getElementById("pause").setAttribute("hidden","true");
+//             document.getElementById("timer").setAttribute("hidden","true");
+//             document.getElementById("timeSetHidden").removeAttribute("hidden");
             
             
-            clearInterval(timerinterval);
+//             clearInterval(timerinterval);
             
-            //사이클을 증가시킴.
-            if(timerFlag==true){
-                cycle++;
-                document.getElementById("cycle").innerText=cycle+" 회";
-            }
-            timerFlag = !timerFlag;
+//             //사이클을 증가시킴.
+//             if(timerFlag==true){
+//                 cycle++;
+//                 document.getElementById("cycle").innerText=cycle+" 회";
+//             }
+//             timerFlag = !timerFlag;
             
-            start();
-        }
-    }
-    //
-    function pauseTimer(){
-        //타이머를 일시정지
-    }
+//             start();
+//         }
+//     }
+//     //
+//     function pauseTimer(){
+//         //타이머를 일시정지
+//     }
 
-//    
+// //    
 
-    function resetTimer(){
-        //타이머를 초기상태로 == stop()
-    }
-   function switchStatus(){
-        //document.getele~~~ 함수를 쓰는 것들로 a->b처럼 상태 전환되는 경우를 함수로 처리하기.
+//     function resetTimer(){
+//         //타이머를 초기상태로 == stop()
+//     }
+//    function switchStatus(){
+//         //document.getele~~~ 함수를 쓰는 것들로 a->b처럼 상태 전환되는 경우를 함수로 처리하기.
 
-    }
+//     }
 
 
    
