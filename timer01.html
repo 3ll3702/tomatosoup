@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>타이머</title>
+</head>
+<body>  
+       
+                <p id="timerStatus">대기중</p>
+            <span id="timeSetHidden">
+                    입력: <input type="number" id="setTime" value="0" style="width:30px;">분
+                </span>
+                <p id="timer" hidden>00:00</p>
+                <p id="cycle">0 회</p>
+
+
+    
+    <button id="start" onclick="start()" style="width:80px; height:40px;">시작</button>
+    <button id="pause" onclick="pause()" style="width:80px; height:40px;" hidden>일시정지</button>
+    <button id="stop" onclick="stop()" style="width:80px; height:40px;" hidden>정지</button>
+
+    
+
+</body>
+
+<script>
+    const relaxTime = 3;//임시로 3 부여해둠. 3분 쉬기 위해서. 추후 개인 설정값을 가져옴
+    const longRelaxTime = 6; //임시로 6부여해둠 그냥 길게 표현. 추후 개인 설정값을 가져옴
+
+    let setTime; // 추후에 개인 설정값을 가져옴.
+    let cycle = 0;
+    let currentTime;
+    let timerinterval;
+    let pauseFlag=false;
+    let timerFlag=true; 
+    
+    function start(){
+        timerFlagSwitch();
+        setTime=document.getElementById("setTime").value;
+        if(timerFlag){
+        currentTime = new Date(setTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
+        }else if(!timerFlag && (cycle)%4!=0) {
+            currentTime = new Date(relaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
+        }else{
+            currentTime = new Date(longRelaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
+        }
+        document.getElementById("timer").innerText=currentTime.toString().substring(19,24);
+        clearInterval(timerinterval) 
+        document.getElementById("start").setAttribute("hidden","true"); 
+        document.getElementById("pause").removeAttribute("hidden");
+        document.getElementById("stop").removeAttribute("hidden");
+        document.getElementById("timeSetHidden").setAttribute("hidden","true"); 
+        document.getElementById("timer").removeAttribute("hidden");
+        timerinterval = setInterval(timer,1000);
+    }
+
+    function pause(){
+        if(currentTime<=0){
+            return;
+        }else if(!pauseFlag){
+            clearInterval(timerinterval);
+            document.getElementById("timerStatus").innerText="일시정지 중";
+            document.getElementById("pause").innerText="재개";
+        }else{
+            if(timerFlag){
+                document.getElementById("timerStatus").innerText="공부중";//학습 중일 때
+            }else if(!timerFlag && (cycle)%4!=0){
+                document.getElementById("timerStatus").innerText="휴식중";//휴식 중일 때
+            }else{
+                document.getElementById("timerStatus").innerText="긴휴식중";//휴식 중일 때
+            }
+            timerinterval = setInterval(timer,1000);
+            document.getElementById("pause").innerText="일시정지";
+        }
+        pauseFlag = !pauseFlag;
+    }
+
+    function timer() { 
+
+        currentTime = currentTime.setTime(currentTime-1000);
+        currentTime = new Date(currentTime);
+        document.getElementById("timer").innerText=currentTime.toString().substring(19,24);
+        console.log(currentTime.getTime());
+        if(currentTime.getTime()<=0){
+            document.getElementById("setTime").value=setTime;
+            document.getElementById("start").removeAttribute("hidden");
+            document.getElementById("pause").setAttribute("hidden","true");
+            document.getElementById("timer").setAttribute("hidden","true");
+            document.getElementById("timeSetHidden").removeAttribute("hidden");
+            clearInterval(timerinterval);
+            if(timerFlag==true){
+                cycle++;
+                document.getElementById("cycle").innerText=cycle+" 회";
+            }
+            timerFlag = !timerFlag;
+            
+            start();
+        }
+    }
+
+    function stop(){
+
+        //이 자리에 저장되는 기능이 있어야 함.
+        currentTime=0;
+        pauseFlag=false;
+        timerFlag=true; 
+        cycle = 0;
+        clearInterval(timerinterval);
+        document.getElementById("timer").innerText="00:00";
+        document.getElementById("cycle").innerText="0 회";
+        document.getElementById("timerStatus").innerText="대기중";
+        document.getElementById("stop").setAttribute("hidden","true");
+        document.getElementById("pause").setAttribute("hidden","true");
+        document.getElementById("start").removeAttribute("hidden")
+    }
+
+
+    function timerFlagSwitch(){
+        if(timerFlag){
+                document.getElementById("timerStatus").innerText="공부중";//학습 중일 때
+            }else if(!timerFlag && (cycle)%4!=0){
+                document.getElementById("timerStatus").innerText="휴식중";//휴식 중일 때
+            }else{
+                document.getElementById("timerStatus").innerText="긴휴식중";//긴휴식 중일 때
+            }
+    }
+
+</script>
+</html>
