@@ -8,14 +8,14 @@
        
                 <p id="timerStatus">대기중</p>
             <span id="timeSetHidden">
-                    입력: <input type="number" id="extraStudyTime" value="0" style="width:30px;">분
+                    입력: <input type="number" id="extraStudyTime" value="0" style="width:30px;" hidden>분
                 </span>
-                <p id="timer" hidden>00:00</p>
+                <p id="timer" >00:00:00</p>
                 <p id="cycle">0 회</p>
 
 
     
-    <button id="start" onclick="start()" style="width:80px; height:40px;">시작</button>
+    <button id="start" onclick="startTimer()" style="width:80px; height:40px;">시작</button>
     <button id="pause" onclick="pause()" style="width:80px; height:40px;" hidden>일시정지</button>
     <button id="stop" onclick="stop()" style="width:80px; height:40px;" hidden>정지</button>
 
@@ -55,8 +55,9 @@
     let longBreak;
     let isPaused =false;
     let isStudyTime = ["공부중", "휴식중", "긴휴식중"];
+    let requestStop = false;
     
-    function startTimer(){
+    function startTimer(){ //메인 함수? 타이머(공부중을 시작해서 끝내기까지?)
         setInitial();
         switchUi();
         setInterval(runStudyTimer,1000);
@@ -69,26 +70,30 @@
         longBreak=6;
     }
 
-    function switchUiHidden(selector){
+    function hideButton(selector){ //html에서 히든을 스위치 하기 위한 장치. 
         //document.getSelection(selector) 작성중
     }
    
-    function runStudyTimer(){
+    function runStudyTimer(){ //현재 공부모드
          if(studyTime>=targetTime){
             switchUi();
-            return; 
+            //return; 테스트용 문구 
+        }
+        if(requestStop==true){
+            return;
         }
         studyTime = studyTime+second;
         printStudyTime();
     }
-   
+   //3 3 4
     
-    function printStudyTime(){
-        console.log(new Date((initialTime.getTime())+studyTime).toString().substring(16,24));
-        //console.log(new Date(initialTime.getTime()+studyTime));
+    function printStudyTime(){ //현재 공부 시간을 출력하는 함수
+        document.querySelector("#timer").innerHTML=(new Date((initialTime.getTime())+studyTime).toString().substring(16,24));
     }
     
-    startTimer();
+    function saveInfo(){
+        //데이터를 저장하는 함수
+    }
     
     
     
@@ -99,13 +104,15 @@
     1.pause() : 시간이 잠시 멈추는 기능
     2.resetTimer() 완전히 정지시키는 기능 
 
-*/
+*/  
+    function switchUi(){}
+
     function switchStatus(status){
         console.log(status);
         status = !status;
         console.log(status);
     }
-        switchStatus(isPaused);
+
 
 /*
 3.한 사이클의 목표시간을 정확히 완수하여 그와 관련 처리 후에 휴식으로 넘어가는 기능
