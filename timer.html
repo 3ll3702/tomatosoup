@@ -26,6 +26,7 @@
 </body>
 
 <script>
+    
 /* 투두리스트? 약간의 생각정리를 위한 구간?
     구조는 주석 + 각 구간에 해당하는 함수로 이루어 질 것임.
 */
@@ -36,39 +37,60 @@
     1.startTimer()먼저 구성해보기.
         안에 들어가야하는 것.
         *setInitial 초기 값을 설정하는 함수
+            시간 설정을 어떻게 해줘야 할까. 기본값에서 타임존값을 더해서 UTC기준으로 만들음.
+            처음 시간인 00:00:00으로 초기값 설정.
+            이제 공부한 시간을 담을 변수 하나
         *switchUi ui에서 스위치처럼 바뀔 필요가 있는 부분을 바꿔주는 함수
-        *timerInterval :timer()를 인터벌을 줘서 시간 측정용.
     2.timer()
-*/
+*/  
+    const second = 1000;
+    const minute = 60*second;
+    const hour = 60*minute; // 시간 계산을 하기 쉽고 읽기 쉽게
+    const timeZone = new Date().getTimezoneOffset()*60*1000;
+    const initialTime = new Date(0+timeZone);
 
+    let studyTime; //내가 공부한 시간.
+    let targetTime; // 내가 공부할 시간
+    let shortBreak;
+    let longBreak;
+    let isPaused =false;
+    let isStudyTime = ["공부중", "휴식중", "긴휴식중"];
+    
     function startTimer(){
-
+        setInitial();
+        switchUi();
+        setInterval(runStudyTimer,1000);
+        clearInterval(runStudyTimer);
     }
     function setInitial(){
-
+        studyTime=0;
+        targetTime=10*second;
+        shortBreak=3;
+        longBreak=6;
     }
+
     function switchUi(){
 
     }
-    function timerInterval(){
-        setInterval
+   
+    function runStudyTimer(){
+         if(studyTime>=targetTime){
+            switchUi();
+            return; 
+        }
+        studyTime = studyTime+second;
+        printStudyTime();
     }
    
-    function timer(){
-      
+    
+    function printStudyTime(){
+        console.log(new Date((initialTime.getTime())+studyTime).toString().substring(16,24));
+        //console.log(new Date(initialTime.getTime()+studyTime));
     }
-
-    let hour = 8*60*60*1000;
-    let minute = 30*60*1000;
-    let targetTime = new Date(hour+minute-(9*60*60*1000));
-    const initialTime = new Date(-(9*60*60*1000));
+    
+    startTimer();
     
     
-    
-    console.log(initialTime);
-    console.log(targetTime);
-    console.log(targetTime.getHours()+":"+targetTime.getMinutes());
-    console.log((initialTime.getTime(100000)))
     
 
 
@@ -77,6 +99,15 @@
     1.pause() : 시간이 잠시 멈추는 기능
     2.resetTimer() 완전히 정지시키는 기능 
 
+*/
+    function switchStatus(status){
+        console.log(status);
+        status = !status;
+        console.log(status);
+    }
+switchStatus(isPaused);
+
+/*
 3.한 사이클의 목표시간을 정확히 완수하여 그와 관련 처리 후에 휴식으로 넘어가는 기능
     successToFocus(): 목표 시간에 도달하면 활성화가 됨.
     failToFocus() :집중하지 못한 경우 누르게 되어 있음
