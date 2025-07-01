@@ -6,18 +6,24 @@
 </head>
 <body>  
        
-                <p id="timerStatus">대기중</p>
-            <span id="timeSetHidden">
-                    입력: <input type="number" id="extraStudyTime" value="0" style="width:30px;" hidden>분
-                </span>
-                <p id="timer" >00:00:00</p>
-                <p id="cycle">0 회</p>
+    <p id="timerStatus">대기중</p>
+    <span id="timeSetHidden">
+        입력: <input type="number" id="targetTime" value="0" style="width:30px;">분
+    </span>
+    <p id="timer" >00:00:00</p>
+    <p id="cycle">0 회</p>
 
 
-    
-    <button id="start" onclick="startTimer()" style="width:80px; height:40px;">시작</button>
-    <button id="pause" onclick="pause()" style="width:80px; height:40px;" hidden>일시정지</button>
-    <button id="stop" onclick="stop()" style="width:80px; height:40px;" hidden>정지</button>
+    <button onclick="uiReady()">테스트대기중</button>
+    <button onclick="uiStudyIncomplete()">테스트목표전</button>
+    <button onclick="uiStudyComplete()">테스트목표후</button>
+    <button onclick="uiPauseRest()">테스트일시정지/휴식</button>
+
+    <div><p></p></div>
+    <button id="startBtn" onclick="startTimer()" style="width:80px; height:40px;">시작</button>
+    <button id="completeBtn" onclick="startTimer()" style="width:80px; height:40px;" hidden disabled>완료</button>
+    <button id="pauseBtn" onclick="pause()" style="width:80px; height:40px;" disabled>일시정지</button>
+    <button id="stopBtn" onclick="stop()" style="width:80px; height:40px;" hidden>정지</button>
 
     <div class="title" id="name" hidden="hidden"></div>
 
@@ -29,6 +35,63 @@
     
 /* 투두리스트? 약간의 생각정리를 위한 구간?
     구조는 주석 + 각 구간에 해당하는 함수로 이루어 질 것임.
+
+  ~~  0.추가적인 값을 입력받음. (우선은 목표시간만 있을 것 같음.) ~~
+  ~~  1.버튼 바꿈-> UI 변경용 함수를 만들어서 헷갈리지 않게 해둠. ~~
+  ~~  2.기존 인터벌을 죽임 - > 2 번이상 실행되는 걸 막음 ~~
+  ~~  3.초기 설정값을 집어넣음 -> 기준을 잡아줌 ~~
+    4.인터벌 실행 -> 실제 타이머가 작동함.
+    5.종료 버튼 활성화 - > 조건에 맞춰서 활성화 시킴.
+    6.종료 버튼 누를시 휴식으로 또는 긴휴식으로 진입
+
+    //활성상태 : 공부중, 휴식중, 긴휴식중을 의미함
+    *활성상태 내에서의 이동  공부중  <-> 휴식중, 긴휴식중
+    //비활성 상태 : 대기중, 일시정지 상태를 의미함
+    *비활성상태를 포함한 이동    활성상태  <-> 일시정지 <-> 대기중
+
+    버튼 목록
+    시작, 일시정지, 정지, 완료
+    대기중
+    보임, 활성 : 시작
+    보임, 비활성 : 일시정지
+    안보임 : 완료, 정지
+
+    공부중(시간 미달성)
+    보임, 활성 : 일시정지
+    보임, 비활성 : 완료
+    안보임 : 시작, 정지
+
+    공부중(시간 달성)
+    보임, 활성 :  완료
+    보임, 비활성 : 일시정지
+    안보임 : 시작, 정지
+
+    휴식중
+    보임, 활성 : 완료, 일시정지 
+    보임, 비활성 : 
+    안보임 : 정지, 시작
+
+    일시정지중
+    보임, 활성 : 시작, 정지
+    보임, 비활성 :
+    안보임 : 일시정지, 완료
+
+    상태가 변화할때 ui가 바뀌게 해야함.
+
+    *제대로 수행된 경우
+    집중시간을 계산해서 사용자 경험을 살려주는 기능
+    improveFocus()
+    deteriorateFocus()
+
+    원칙
+    1.일단 만들음
+    2.하나로 합칠 수 있는 걸 합침.
+    3.더 간략화할 수 있으면 간략화함.
+
+    변수 만드는 조건
+    변하지 않는 값= const로 하고
+    타입이 바뀌거나 값이 바뀌는 경우에는 let으로 하고
+    var는 하지 않음.
 */
 
 
@@ -41,51 +104,44 @@
             처음 시간인 00:00:00으로 초기값 설정.
             이제 공부한 시간을 담을 변수 하나
         *switchUi ui에서 스위치처럼 바뀔 필요가 있는 부분을 바꿔주는 함수
-    2.timer()
-*/  
-    const second = 1000;
+
+    
+*/
+
+    //시간 관련 변수
+    const second = 1000;//ms
     const minute = 60*second;
     const hour = 60*minute; // 시간 계산을 하기 쉽고 읽기 쉽게
-    const timeZone = new Date().getTimezoneOffset()*60*1000;
-    const initialTime = new Date(0+timeZone);
-
+    const timeZone = new Date().getTimezoneOffset()*60*1000; // 개개인의 타임존이 다를 수 있기에 해둔 설정.
+    const initialTime = new Date(0+timeZone); //모두의 시작 시간을 00시 00분 00초로 고정하기 위한 설정.
+    //가변 변수 모음.
     let studyTime; //내가 공부한 시간.
     let targetTime; // 내가 공부할 시간
     let shortBreak;
     let longBreak;
     let isPaused =false;
-    let isStudyTime = ["공부중", "휴식중", "긴휴식중"];
+    let isStudyTime = false;
     let requestStop = false;
     
     function startTimer(){ //메인 함수? 타이머(공부중을 시작해서 끝내기까지?)
+        uiStudyIncomplete();
+        clearInterval(runStudyTimer);
         setInitial();
-        switchUi();
         setInterval(runStudyTimer,1000);
         clearInterval(runStudyTimer);
     }
     function setInitial(){
         studyTime=0;
-        targetTime=10*second;
+        targetTime=document.getElementById("targetTime").value*second; //주석 지우기 전에 분 단위로 바꿔둘 것.
         shortBreak=3;
         longBreak=6;
     }
 
-    function hideButton(selector){ //html에서 히든을 스위치 하기 위한 장치. 
-        //document.getSelection(selector) 작성중
-    }
-   
-    function runStudyTimer(){ //현재 공부모드
-         if(studyTime==targetTime){
-            switchUi();
-            //return; 테스트용 문구 
-        }
-        if(requestStop==true){
-            return;
-        }
+    function runStudyTimer(){ // 현재 공부 시간 증가
+        if(studyTime==targetTime) uiStudyComplete();
         studyTime = studyTime+second;
         printStudyTime();
     }
-   //3 3 4
     
     function printStudyTime(){ //현재 공부 시간을 출력하는 함수
         document.querySelector("#timer").innerHTML=(new Date((initialTime.getTime())+studyTime).toString().substring(16,24));
@@ -95,8 +151,94 @@
         //데이터를 저장하는 함수
     }
     
-    
-    
+    function isSuccess(){
+        if(studyTime>=targetTime){
+            gEid().setAttribute("hidden","true");
+            gEid().removeAttribute("hidden");
+        }
+    }
+
+//UI 관련 함수 모음
+    //버튼 목록
+    //시작startBtn, 일시정지pauseBtn, 정지stopBtn, 완료completeBtn
+
+    function status_Can_Can(id){
+        removeHidden(id);
+        removeDisabled(id);
+        
+    }
+    function status_Can_Cant(id){
+        removeHidden(id);
+        setDisabled(id);
+    }
+
+    function status_Cant(id){
+        setHidden(id);
+    }
+        function setDisabled(id){
+            if(!document.getElementById(id).hasAttribute("disabled")){
+                document.getElementById(id).setAttribute("disabled","true")
+            }
+        }
+        function removeDisabled(id){
+            if(document.getElementById(id).hasAttribute("disabled")){
+            document.getElementById(id).removeAttribute("disabled")
+            }
+        }
+        function setHidden(id){
+            if(!document.getElementById(id).hasAttribute("hidden")){
+            document.getElementById(id).setAttribute("hidden","true")
+            }
+        }
+        function removeHidden(id){
+            if(document.getElementById(id).hasAttribute("hidden")){
+            document.getElementById(id).removeAttribute("hidden")
+            }
+        }
+    /*대기중
+    보임, 활성 : 시작
+    보임, 비활성 : 일시정지
+    안보임 : 완료, 정지*/
+    //시작startBtn, 일시정지pauseBtn, 정지stopBtn, 완료completeBtn
+    function uiReady(){
+        status_Can_Can("startBtn");
+        status_Can_Cant("pauseBtn");
+        status_Cant("completeBtn");
+        status_Cant("stopBtn");
+    }
+    /* 공부중(시간 미달성)
+    보임, 활성 : 일시정지
+    보임, 비활성 : 완료
+    안보임 : 시작, 정지*/
+    //시작startBtn, 일시정지pauseBtn, 정지stopBtn, 완료completeBtn
+    function uiStudyIncomplete(){
+        status_Can_Can("pauseBtn");
+        status_Can_Cant("completeBtn");
+        status_Cant("startBtn");
+        status_Cant("stopBtn");
+    }
+    /*공부중(시간 달성)
+    보임, 활성 :  완료
+    보임, 비활성 : 일시정지
+    안보임 : 시작, 정지*/
+    //시작startBtn, 일시정지pauseBtn, 정지stopBtn, 완료completeBtn
+    function uiStudyComplete(){
+        status_Can_Can("completeBtn");
+        status_Can_Cant("pauseBtn");
+        status_Cant("startBtn");
+        status_Cant("stopBtn");
+    }
+    /*정지/휴식중
+    보임, 활성 : 완료, 정지 
+    보임, 비활성 : 
+    안보임 : 일시정지, 시작 */
+   //시작startBtn, 일시정지pauseBtn, 정지stopBtn, 완료completeBtn
+    function uiPauseRest(){
+        status_Can_Can("startBtn");
+        status_Can_Can("stopBtn");
+        status_Cant("pauseBtn");
+        status_Cant("completeBtn");
+    }
 
 
 /*
@@ -105,13 +247,7 @@
     2.resetTimer() 완전히 정지시키는 기능 
 
 */  
-    function switchUi(){}
-
-    function switchStatus(status){
-        console.log(status);
-        status = !status;
-        console.log(status);
-    }
+// start complete pause stop
 
 
 /*
@@ -130,206 +266,6 @@
     deteriorateFocus()
 
 */
-
-
-
-
-
-
-//현재 돌아가는 상태
-// start() - > 각종 태그를 숨기거나 보이고, 필요한 초기값을 입력하고 timer()를 실행시킴
-// 숨기는것 : 시작, 시간입력 | 보이는 것 : 일시정지, 정지, 시간출력
-// 입력하는 값 : studyTimeLeft addStudyTime 
-// 처음 시작 시간을 먼저 출력해줌. 그래야 처음 60초를 공부한다면 60부터 시작해서 0초로 끝남.
-
-
-//startTimer()
-//필요한 변수
-//     let shortRelaxTime;//임시로 3 부여해둠. 3분 쉬기 위해서. 추후 개인 설정값을 가져옴
-//     let longRelaxTime; //임시로 6부여해둠 그냥 길게 표현. 추후 개인 설정값을 가져옴
-//     let studyTime;//임시로 3을 부여해둠. 추후 개인 설정값을 가져옴 
-//     let cycle = 0; //공부사이클
-//     let studyTimeLeft; //현재 남은 공부 시간
-//     let isPaused=false; //일시정지상태?
-//     let isStudyTime=true; //공부상태?
-//     let timerinterval = setInterval(timer,1000); //
-    
-
-
-
-// //필요한 함수
-//    function startTimer(){
-//         requestUserInitialValue();
-//         setInitialValue();
-//         controlUI_01();
-//         timerinterval;
-//     } //같이 쓰일것
-//     function requestUserInitialValue(){
-//         //초기값을 불러오는 용도.
-//         shortRelaxTime = 3;
-//         longRelaxTime = 6;
-//         studyTime = 3;
-//     }
-//     function setInitialValue(){
-//         let extraStudyTime=document.getElementById("extraStudyTime").value;
-//         let extraShortRelaxTime=document.getElementById("").value;
-//         let extraLongRelaxTime=document.getElementById("").value;
-        
-//         studyTime += extraStudyTime;
-//         shortRelaxTime += extraShortRelaxTime;
-//         longRelaxTime += extraLongRelaxTime
-
-//     }
-//     function controlUI_01(){
-//         // 숨기는것 : 시작, 시간입력 | 보이는 것 : 일시정지, 정지, 시간출력
-//     }
-    
-
-//     //ui 컨트롤
-//     //timerFlag, pauseFlag 두 개의 조건 + cycle의 값에 따라 변화하던 중임.
-//     //위 둘은 isStudyTime과 isPaused로 이름이 변경된 상황.
-
-//  const a = document.getElementById("timerStatus");
-
-
-
-    
-//       function timerFlagSwitch(){
-//         if(timerFlag){
-//                 a.innerText="공부중";//학습 중일 때
-//             }else if(!timerFlag && (cycle)%4!=0){
-//                 a.innerText="휴식중";//휴식 중일 때
-//             }else{
-//                 a.innerText="긴휴식중";//긴휴식 중일 때
-//             }
-
-//     }
-
-// // timer()를 인터벌로 동작시킴 - >
-
-//     function start(){
-//         timerFlagSwitch();
-//         addStudyTime=document.getElementById("setTime").value;
-//         if(timerFlag){
-//         studyTimeLeft = new Date(addStudyTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
-//         }else if(!timerFlag && (cycle)%4!=0) {
-//             studyTimeLeft = new Date(shortRelaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
-//         }else{
-//             studyTimeLeft = new Date(longRelaxTime*1000); //임시로 1000을 부여해둠. 테스트가 끝나면 60*1000으로 바꿀 것.
-//         }
-//         document.getElementById("timer").innerText=studyTimeLeft.toString().substring(19,24);
-//         clearInterval(timerinterval) 
-
-//         //이 아래 다섯.
-//         document.getElementById("start").setAttribute("hidden","true"); 
-//         document.getElementById("pause").removeAttribute("hidden");
-//         document.getElementById("stop").removeAttribute("hidden");
-//         document.getElementById("timeSetHidden").setAttribute("hidden","true"); 
-//         document.getElementById("timer").removeAttribute("hidden");
-
-//         timerinterval;
-
-        
-//     }
-
-    
-//     function stop(){
-
-//         //이 자리에 저장되는 기능이 있어야 함.
-//         studyTimeLeft=0;
-//         pauseFlag=false;
-//         timerFlag=true; 
-//         cycle = 0;
-//         clearInterval(timerinterval);
-//         document.getElementById("timer").innerText="00:00";
-//         document.getElementById("cycle").innerText="0 회";
-//         document.getElementById("timerStatus").innerText="대기중";
-
-//         //이 아래 셋 switchStatus();
-//         document.getElementById("stop").setAttribute("hidden","true");
-//         document.getElementById("pause").setAttribute("hidden","true");
-//         document.getElementById("start").removeAttribute("hidden")
-//     }
-
-// //
-
- 
-
-    
-  
-
-// //
-
-
-
-    
-
-//     function pause(){
-//         if(studyTimeLeft<=0){
-//             return;
-//         }else if(!pauseFlag){
-//             clearInterval(timerinterval);
-//             document.getElementById("timerStatus").innerText="일시정지 중";
-//             document.getElementById("pause").innerText="재개";
-//         }else{
-//             if(timerFlag){
-//                 document.getElementById("timerStatus").innerText="공부중";//학습 중일 때
-//             }else if(!timerFlag && (cycle)%4!=0){
-//                 document.getElementById("timerStatus").innerText="휴식중";//휴식 중일 때
-//             }else{
-//                 document.getElementById("timerStatus").innerText="긴휴식중";//휴식 중일 때
-//             }
-//             timerinterval = setInterval(timer,1000);
-//             document.getElementById("pause").innerText="일시정지";
-//         }
-//         pauseFlag = !pauseFlag;
-//     }
-
-//     function timer() { 
-
-//         studyTimeLeft = studyTimeLeft.setTime(studyTimeLeft-1000);
-//         studyTimeLeft = new Date(studyTimeLeft);
-//         document.getElementById("timer").innerText=studyTimeLeft.toString().substring(19,24);
-//         console.log(studyTimeLeft.getTime());
-//         if(studyTimeLeft.getTime()<=0){
-//             document.getElementById("setTime").value=addStudyTime;
-
-//             //이 아래 넷
-//             document.getElementById("start").removeAttribute("hidden");
-//             document.getElementById("pause").setAttribute("hidden","true");
-//             document.getElementById("timer").setAttribute("hidden","true");
-//             document.getElementById("timeSetHidden").removeAttribute("hidden");
-            
-            
-//             clearInterval(timerinterval);
-            
-//             //사이클을 증가시킴.
-//             if(timerFlag==true){
-//                 cycle++;
-//                 document.getElementById("cycle").innerText=cycle+" 회";
-//             }
-//             timerFlag = !timerFlag;
-            
-//             start();
-//         }
-//     }
-//     //
-//     function pauseTimer(){
-//         //타이머를 일시정지
-//     }
-
-// //    
-
-//     function resetTimer(){
-//         //타이머를 초기상태로 == stop()
-//     }
-//    function switchStatus(){
-//         //document.getele~~~ 함수를 쓰는 것들로 a->b처럼 상태 전환되는 경우를 함수로 처리하기.
-
-//     }
-
-
-   
 
 </script>
 </html>
